@@ -1,4 +1,4 @@
-__author__ = 'Talmaj'
+__author__ = 'Talmaj, Alan'
 import pandas as pd
 
 class engine(object):
@@ -138,6 +138,60 @@ class from_followings(engine):
 class from_favorites(engine):
     pass
 
+class from_followers_backlink(engine):
+    '''
+        Class builds a tree like graph and searches for a backlink from a lower to an upper level
+
+        Note: might be inefficient with bigger depths then 3 deppending of the branching factor
+    '''
+    def __init__(self,client):
+        engine.__init__(self,client);
+        self.tree = self.build_reverse_tree(3);
+        self.find_backlinks();
+        self.suggested_artists = self.get_recommendations();
+
+    def get_recommendations(self):
+        rec = []
+        for link in tree[3]:
+            if( link['backlinks'] > 0 ):
+                rec.append(link['parent'])
+        return rec
+
+
+    def find_backlinks(self):
+        '''
+            find backlinks and save them
+            TODO: use ordered lists to improve performance for search in tree[1]
+        '''
+        for link in tree[3]:
+            for following in tree[1]:
+                if(link['id'] == following['id']):
+                    try:
+                        link['backlinks'] += 1
+                    except KeyError:
+                        link['backlinks'] = 1
+                else:
+                    link['backlinks'] = 0
+
+
+    def build_reverse_tree(self,level):
+        '''
+        Builds a reverse tree structure saving nodes of a level in a list 
+        and adds a parent link to each of them
+
+        :param level: maximum number of levels the tree should be expanded
+        :return: returns a list of lists of artists
+        '''
+
+        followers[0] = [{"id":"me"}]
+        for i in range (1,level+1):
+            followers[i] = []
+            for artist in followers[i-1]:
+                temp = self.get_followings(artist["id"])
+                for t in temp:
+                    t["parent"] = artist
+                followers[i] += temp
+        return followers
 
 
 def track_quality(track):
